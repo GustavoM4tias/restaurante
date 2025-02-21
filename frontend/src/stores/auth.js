@@ -1,82 +1,47 @@
+// src/stores/auth.js
 import { defineStore } from "pinia";
 import axios from "axios";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     token: localStorage.getItem("token") || "",
-    tipo: localStorage.getItem("tipo") || ""
+    role: localStorage.getItem("role") || ""
   }),
   getters: {
     isAuthenticated: (state) => !!state.token,
-    tipo_usuario: (state) => state.tipo
+    userRole: (state) => state.role,
   },
   actions: {
     async login(email, senha) {
       try {
         const response = await axios.post("http://localhost:5000/api/login", { email, senha });
-        // Atualiza token e tipo a partir da resposta
+        // Atualiza token e role a partir da resposta
         this.token = response.data.token;
-        this.tipo = response.data.tipo;  
-        // this.tema = response.data.tema;
+        this.role = response.data.role; 
         localStorage.setItem("token", this.token);
-        localStorage.setItem("tipo", this.tipo); 
+        localStorage.setItem("role", this.role);
       } catch (error) {
         console.error("Erro no login", error);
         throw error;
       }
     },
-    async register(nome, email, senha, tipo = null) {
+    async register(nome, email, senha, role = null) {
       try {
-        const data = tipo ? { nome, email, senha, tipo } : { nome, email, senha };
+        // Se role for passado, envie-o; caso contrário, o backend definirá "user"
+        const data = role ? { nome, email, senha, role } : { nome, email, senha };
         await axios.post("http://localhost:5000/api/register", data, {
-          headers: tipo ? { Authorization: this.token } : {}
+          headers: role ? { Authorization: this.token } : {}
         });
       } catch (error) {
-        // Verifica se o erro é de token expirado
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.msg === "Token expired"
-        ) {
-          this.logout();
-          window.location.href = "/login";
-        }
         console.error("Erro no registro", error);
         throw error;
       }
     },
-    async updateUserInfo(updatedData) {
-      try {
-        const response = await axios.put("http://localhost:5000/api/account", updatedData, {
-          headers: {
-            Authorization: this.token
-          }
-        });
-        this.user = response.data;  
-      } catch (error) {
-        console.error("Erro ao atualizar conta:", error);
-      }
-    },
-    async fetchUserInfo() {
-      try {
-        const response = await axios.get("http://localhost:5000/api/account", {
-          headers: {
-            Authorization: this.token
-          }
-        });
-        this.user = response.data;
-        this.tema = response.data.tema; 
-      } catch (error) {
-        console.error("Erro ao buscar dados da conta:", error);
-      }
-    },
     logout() {
       this.token = "";
-      this.tipo = "";
+      this.role = "";
       localStorage.removeItem("token");
-      localStorage.removeItem("tipo");
-      window.location.href = "/";
+      localStorage.removeItem("role");
     },
   },
 });
-

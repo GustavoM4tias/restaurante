@@ -1,44 +1,78 @@
 <template>
-  <nav class="p-4 relative flex justify-between">
-
-    <router-link to="/" class="text-4xl font-bold z-20 ms-3 bg-gray-200 dark:bg-gray-700 px-2 py-1.5 rounded-full">
-      <i class="fas fa-burger dark:text-white text-black"></i>
-    </router-link>
-
-    <div class="absolute top-1/2 transform -translate-y-1/2 transition-all duration-300 overflow-hidden z-10"
-      :style="searchStyle">
-      <input type="text" placeholder="Pesquisar..."
-        class="w-full py-3.5 px-12 sm:px-16 border shadow-md bg-gray-200 dark:bg-gray-700 border-none rounded-full focus:outline-none focus:ring-transparent"
-        style="text-indent: 1rem;" />
-    </div>
-
-    <button @click="toggleSearch" class="text-2xl focus:outline-none transform z-20 me-3 rounded-full bg-gray-200 dark:bg-gray-700 px-3.5">
-      <i class="fas fa-magnifying-glass dark:text-white text-black"></i>
-    </button>
-
-  </nav>
-</template>
-
-<script setup>
-import { ref, computed } from 'vue'
-
-// Controle se o campo de pesquisa está aberto ou fechado
-const searchOpen = ref(false)
-
-const toggleSearch = () => {
-  searchOpen.value = !searchOpen.value
-}
-
-// Offsets para posicionar o input entre a logo e o botão de pesquisa
-const leftOffset = 1.7  // em rem; ajuste conforme a logo
-const rightOffset = 1.7 // em rem; ajuste conforme seu layout
-
-// Estilo dinâmico: posiciona o input e anima com translateY(-50%) + scaleX
-const searchStyle = computed(() => ({
-  top: '50%',
-  left: `${leftOffset}rem`,
-  right: `${rightOffset}rem`,
-  transformOrigin: 'right center',
-  transform: `translateY(-50%) scaleX(${searchOpen.value ? 1 : 0})`
-}))
-</script>
+    <nav class="bg-white dark:bg-gray-800 shadow-md">
+      <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center h-16">
+          <router-link 
+            to="/" 
+            class="text-2xl font-bold text-gray-800 dark:text-white"
+          >
+            E-commerce
+          </router-link>
+  
+          <div class="flex items-center space-x-6">
+            <div class="hidden md:flex space-x-4">
+              <router-link
+                v-if="authStore.isAuthenticated"
+                to="/account"
+                class="nav-link"
+              >
+                Minha Conta
+              </router-link>
+              
+              <button
+                v-if="authStore.isAuthenticated && authStore.userRole === 'admin'"
+                @click="$router.push('/create-product')"
+                class="nav-link"
+              >
+                Novo Produto
+              </button>
+            </div>
+  
+            <div class="flex items-center space-x-4">
+              <button
+                v-if="!authStore.isAuthenticated"
+                @click="$emit('open-login')"
+                class="nav-link"
+              >
+                Login
+              </button>
+              
+              <button
+                v-if="!authStore.isAuthenticated"
+                @click="$emit('open-register')"
+                class="nav-link"
+              >
+                Cadastro
+              </button>
+  
+              <button
+                v-if="authStore.isAuthenticated"
+                @click="authStore.logout()"
+                class="nav-link"
+              >
+                Logout
+              </button>
+  
+              <ThemeButton />
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </template>
+  
+  <script setup>
+  import { useAuthStore } from '../stores/auth'
+  import ThemeButton from './UI/ThemeButton.vue'
+  
+  const authStore = useAuthStore()
+  </script>
+  
+  <style>
+  .nav-link {
+    @apply px-3 py-2 rounded-md text-sm font-medium 
+           text-gray-700 dark:text-gray-300 
+           hover:bg-gray-100 dark:hover:bg-gray-700 
+           transition-colors duration-200;
+  }
+  </style>
