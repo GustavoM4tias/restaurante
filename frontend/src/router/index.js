@@ -1,29 +1,37 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
-// import Login from "../views/Login.vue";
-// import Register from "../views/Register.vue";
-import ProductDetail from "../views/ProductDetail.vue";
-import CreateProduct from "../views/CreateProduct.vue";
-import Account from "../views/Account.vue";
+import Conta from "../views/Conta.vue";  
+import Mapa from "../views/Mapa.vue";  
+import Historico from "../views/Historico.vue";
 import { useAuthStore } from "../stores/auth.js";
+import { eventBus } from "../eventBus";  // Importa o eventBus
 
 const routes = [
   { path: "/", name: "Home", component: Home },
-  // { path: "/login", name: "Login", component: Login, meta: { guestOnly: true } },
-  // { path: "/register", name: "Register", component: Register, meta: { guestOnly: true } },
-  { path: "/product/:id", name: "ProductDetail", component: ProductDetail },
-  { 
-    path: "/create-product", 
-    name: "CreateProduct", 
-    component: CreateProduct, 
-    meta: { requiresAuth: true, requiredRole: "admin" } // Apenas admins podem criar produtos  
+  // {
+  //   path: "/create-product",
+  //   name: "CreateProduct",
+  //   component: CreateProduct,
+  //   meta: { requiresAuth: true, requiredRole: "admin" } // Apenas admins podem criar produtos  
+  // },
+  {
+    path: "/conta",
+    name: "Conta",
+    component: Conta,
+    meta: { requiresAuth: true }
   },
-  { 
-    path: "/account", 
-    name: "Account", 
-    component: Account, 
-    meta: { requiresAuth: true } 
+  {
+    path: "/mapa",
+    name: "Mapa",
+    component: Mapa,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/historico",
+    name: "Historico",
+    component: Historico,
+    meta: { requiresAuth: true }
   }
 ];
 
@@ -33,8 +41,9 @@ const router = createRouter({
 });
 
 // Função para extrair o role a partir do token
-function getRoleFromToken(token) {
+function pegaTipoDoToken(token) {
   try {
+    // console.log("Decodificando token:", token); // Verifica o token recebido
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(
@@ -44,8 +53,16 @@ function getRoleFromToken(token) {
         .join('')
     );
     const payload = JSON.parse(jsonPayload);
+
+    if (payload.exp && Date.now() >= payload.exp * 1000) {
+      console.warn("Token expirado!");
+      return null;
+    }
+
+    // console.log("Token decodificado:", payload);
     return payload.role;
   } catch (e) {
+    console.error("Erro ao processar token:", e);
     return null;
   }
 }
@@ -54,10 +71,27 @@ router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
   const isAuthenticated = !!authStore.token;
 
-  // Rotas que requerem autenticação
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    return next({ name: "Login" });
+  if (authStore.token) {
+    const role = pegaTipoDoToken(authStore.token);
+
+    if (role === null) {
+      console.warn("Token inválido ou expirado!");
+      // Evita deslogar diretamente para testar melhor o comportamento
+      // authStore.logout();
+      // return next({ name: "Login" });
+    }
   }
+  
+  if (to.meta.requiresAuth && !isAuthenticated) { 
+    eventBus.emit("open-login");
+    return next(false);
+  }
+  
+  // Rotas que requerem autenticação
+  // if (to.meta.requiresAuth && !isAuthenticated) {
+  //   authStore.logout();
+  //   return next({ name: "Login" });
+  // }
 
   // Rotas exclusivas para visitantes
   if (to.meta.guestOnly && isAuthenticated) {
@@ -65,13 +99,13 @@ router.beforeEach((to, from, next) => {
   }
 
   // Verifica se a rota requer um role específico
-  if (to.meta.requiredRole) {
-    const userRole = getRoleFromToken(authStore.token);
-    // Permite se o usuário tiver o role requerido ou se for "admin" (admin pode fazer tudo)
-    if (userRole !== to.meta.requiredRole && userRole !== "admin") {
-      return next({ name: "Home" });
-    }
-  }
+  // if (to.meta.requiredRole) {
+  //   const tipo_usuario = pegaTipoDoToken(authStore.token);
+  //   Permite se o usuário tiver o role requerido ou se for "admin"
+  //   if (tipo_usuario !== to.meta.requiredRole && tipo_usuario !== "admin") {
+  //     return next({ name: "Home" });
+  //   }
+  // }
 
   next();
 });
