@@ -39,7 +39,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRestaurantesStore } from '@/stores/restaurantes';
+import { useRestaurantesStore } from '../stores/restaurante';
 
 const restaurantesStore = useRestaurantesStore();
 
