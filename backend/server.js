@@ -15,4 +15,4 @@ console.log("[SERVER] Configurando rotas...");
 app.use("/api", routes);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`[SERVER] Servidor rodando na porta ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`[SERVER] Servidor rodando na porta ${PORT}`));
