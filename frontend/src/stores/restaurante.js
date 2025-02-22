@@ -7,11 +7,10 @@ export const useRestaurantesStore = defineStore("restaurantes", {
         erro: false,
     }),
     actions: {
-        async buscarRestaurantes(lat, lon) {
-            console.log("📍 Buscando restaurantes para LAT:", lat, "LON:", lon);
+        async buscarRestaurantes(lat, lon, radius = 3000, type = "restaurant") {
+            console.log("📍 Buscando restaurantes para LAT:", lat, "LON:", lon, "Raio:", radius, "Tipo:", type);
 
-            // Utiliza o endpoint do backend para buscar os restaurantes
-            const url = `https://restaurante-api-gules.vercel.app/api/restaurantes?lat=${lat}&lon=${lon}`;
+            const url = `https://restaurante-api-gules.vercel.app/api/restaurantes?lat=${lat}&lon=${lon}&radius=${radius}&type=${type}`;
             console.log("🌍 URL da requisição:", url);
 
             try {
