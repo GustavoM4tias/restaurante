@@ -13,7 +13,7 @@ export const useAuthStore = defineStore("auth", {
   actions: {
     async login(email, senha) {
       try {
-        const response = await axios.post("http://192.168.3.66:5000/api/login", { email, senha });
+        const response = await axios.post("https://restaurante-api-gules.vercel.app/api/login", { email, senha });
         // Atualiza token e tipo a partir da resposta
         this.token = response.data.token;
         this.tipo = response.data.tipo;  
@@ -28,7 +28,7 @@ export const useAuthStore = defineStore("auth", {
     async register(nome, email, senha, tipo = null) {
       try {
         const data = tipo ? { nome, email, senha, tipo } : { nome, email, senha };
-        await axios.post("http://192.168.3.66:5000/api/register", data, {
+        await axios.post("https://restaurante-api-gules.vercel.app/api/register", data, {
           headers: tipo ? { Authorization: this.token } : {}
         });
       } catch (error) {
@@ -47,7 +47,7 @@ export const useAuthStore = defineStore("auth", {
     },
     async updateUserInfo(updatedData) {
       try {
-        const response = await axios.put("http://192.168.3.66:5000/api/account", updatedData, {
+        const response = await axios.put("https://restaurante-api-gules.vercel.app/api/account", updatedData, {
           headers: {
             Authorization: this.token
           }
@@ -59,7 +59,7 @@ export const useAuthStore = defineStore("auth", {
     },
     async fetchUserInfo() {
       try {
-        const response = await axios.get("http://192.168.3.66:5000/api/account", {
+        const response = await axios.get("https://restaurante-api-gules.vercel.app/api/account", {
           headers: {
             Authorization: this.token
           }
