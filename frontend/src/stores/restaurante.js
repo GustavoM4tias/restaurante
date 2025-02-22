@@ -11,7 +11,7 @@ export const useRestaurantesStore = defineStore("restaurantes", {
             console.log("📍 Buscando restaurantes para LAT:", lat, "LON:", lon);
 
             // Utiliza o endpoint do backend para buscar os restaurantes
-            const url = `http://localhost:5000/api/restaurantes?lat=${lat}&lon=${lon}`;
+            const url = `http://192.168.3.66:5000/api/restaurantes?lat=${lat}&lon=${lon}`;
             console.log("🌍 URL da requisição:", url);
 
             try {

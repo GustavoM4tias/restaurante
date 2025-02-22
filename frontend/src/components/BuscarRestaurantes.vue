@@ -14,7 +14,7 @@ export default {
             if ("geolocation" in navigator) {
                 const options = {
                     enableHighAccuracy: false, // Desabilita alta precisão para acelerar o processo em desktops
-                    timeout: 15000,            // Timeout de 15 segundos
+                    timeout: 10000,            // Timeout de 15 segundos
                     maximumAge: 0              // Não utiliza cache de localização
                 };
 
