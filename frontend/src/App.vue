@@ -62,11 +62,11 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-    <NavBar class="fixed top-0 w-full" />
+    <NavBar class="fixed top-0 w-full z-50" />
 
     <router-view class="mb-[10vh] min-h[84vh] h-full flex-1" />
 
-    <Footer class="fixed bottom-0 w-full h-[8vh]" />
+    <Footer class="fixed bottom-0 w-full h-[8vh] z-50" />
 
     <!-- Auth Modals -->
     <LoginModal v-if="showLoginModal" @close="closeAuthModals" @switch-to-register="switchAuthModals('register')" />
