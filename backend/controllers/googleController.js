@@ -32,7 +32,7 @@ export const buscarRestaurantes = async (req, res) => {
         return res.status(400).json({ msg: "Latitude e Longitude são obrigatórios." });
     }
 
-    const effectiveRadius = radius || 3000;
+    const effectiveRadius = radius || 1000;
     const effectiveType = type || "restaurant";
     const apiKey = process.env.GOOGLE_API_KEY;
 
