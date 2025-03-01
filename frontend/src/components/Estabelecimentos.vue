@@ -78,7 +78,7 @@ const props = defineProps({
 });
 
 const restaurantesStore = useRestaurantesStore();
-const radius = ref(3000);
+const radius = ref(1000);
 const type = ref("restaurant");
 
 // Função que usa as coordenadas recebidas e os inputs para buscar restaurantes

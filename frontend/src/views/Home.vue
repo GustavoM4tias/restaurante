@@ -1,6 +1,6 @@
 <template>
   <div class="h-screen w-screen flex relative">
-    <iframe :src="mapUrl" class="w-full h-full border-0 absolute z-20" allowfullscreen loading="lazy"
+    <iframe :src="mapUrl" class="w-full h-full border-0 absolute z-0" allowfullscreen loading="lazy"
       referrerpolicy="no-referrer-when-downgrade">
     </iframe>
 
@@ -21,7 +21,7 @@ const currentLat = ref(-22.2136781);
 const currentLon = ref(-49.9476783);
 
 // Variáveis para os parâmetros da busca (aqui definidas apenas para uso na busca inicial)
-const radius = ref(3000);
+const radius = ref(1000);
 const type = ref("restaurant");
 
 // Monta a URL do mapa com base nas coordenadas
