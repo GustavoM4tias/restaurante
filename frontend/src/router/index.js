@@ -6,6 +6,7 @@ import Mapa from "../views/Mapa.vue";
 import Historico from "../views/Historico.vue";
 import { useAuthStore } from "../stores/auth.js";
 import { eventBus } from "../eventBus";  // Importa o eventBus
+import RestauranteDetalhes from "../views/RestauranteDetalhes.vue";
 
 const routes = [
   { path: "/", name: "Home", component: Home },
@@ -31,6 +32,12 @@ const routes = [
     path: "/historico",
     name: "Historico",
     component: Historico,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/restaurante-detalhes",
+    name: "RestauranteDetalhes",
+    component: RestauranteDetalhes,
     meta: { requiresAuth: true }
   }
 ];
