@@ -20,7 +20,8 @@
         <div v-if="restaurantesStore.restaurantes.length > 0"
             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 filter drop-shadow-2xl mt-4">
             <div v-for="(restaurante, index) in restaurantesStore.restaurantes" :key="index"
-                class="flex flex-col rounded-3xl shadow-sm my-3 overflow-hidden relative">
+                @click="$router.push({ path: '/restaurante-detalhes', query: restaurante })"
+                class="flex flex-col rounded-3xl shadow-sm my-3 overflow-hidden relative cursor-pointer hover:shadow-lg transition-all">
                 <!-- Imagem do restaurante -->
                 <img :src="restaurante.imageUrl" alt="Imagem do restaurante"
                     class="w-full h-48 object-cover rounded-t-3xl">
