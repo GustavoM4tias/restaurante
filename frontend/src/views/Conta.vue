@@ -1,9 +1,7 @@
 <template>
-  <!-- Container Principal -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">  
   <div class="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4 sm:p-6">
-    <!-- Div centralizada com as informações da conta -->
     <div v-if="userInfo" class="w-full max-w-2xl p-6 sm:p-8 rounded-lg shadow-xl bg-white dark:bg-gray-800 relative">
-      <!-- Ícone de Logout dentro da div centralizada -->
       <i
         v-if="authStore.isAuthenticated"
         @click="authStore.logout()"
@@ -42,18 +40,29 @@
               :true-value="1"
               :false-value="0"
               aria-label="Alternar tema"
+              @change="toggleTheme"
             />
             <div
-              class="group peer bg-white rounded-full duration-300 w-14 h-7 sm:w-16 sm:h-8 ring-2 ring-red-500 
-              after:duration-300 after:bg-red-500 peer-checked:after:bg-stone-300 peer-checked:ring-stone-300 
-              after:rounded-full after:absolute after:h-5 after:w-5 sm:after:h-6 sm:after:w-6 after:top-1 after:left-1 
-              after:flex after:justify-center after:items-center peer-checked:after:translate-x-7 sm:peer-checked:after:translate-x-8 
-              peer-hover:after:scale-95"
-            ></div>
+              class="w-14 h-7 sm:w-16 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors duration-500"
+            >
+              <!-- Tema Escuro -->
+              <span
+                class="absolute left-1 top-1/2 transform -translate-y-1/2 text-yellow-500 transition-opacity duration-500"
+                :class="{ 'opacity-0': editedUser.tema === 1, 'opacity-100': editedUser.tema === 0 }"
+              >
+                <i class="bi bi-sun-fill text-lg sm:text-xl"></i> 
+              </span>
+              <!-- Tema Claro -->
+              <span
+                class="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-500 transition-opacity duration-500"
+                :class="{ 'opacity-0': editedUser.tema === 0, 'opacity-100': editedUser.tema === 1 }"
+              >
+                <i class="bi bi-moon-fill text-lg sm:text-xl"></i> 
+              </span>
+            </div>
           </label>
         </div>
 
-        <!-- Botão de Atualizar -->
         <UIButton
           class="w-full mt-4 sm:mt-6 py-2 sm:py-3 text-base sm:text-lg font-semibold"
           type="submit"
@@ -86,41 +95,40 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useAuthStore } from '../stores/auth';
 import UIInput from "../components/UI/Input.vue";
 import UIButton from "../components/UI/Button.vue";
 
 const authStore = useAuthStore();
 const userInfo = ref(null);
-const editedUser = ref({});
+const editedUser = ref({
+  tema: localStorage.getItem('theme') === 'dark' ? 0 : 1, 
+});
 const showMessage = ref(false);
 
-// Função para desabilitar a rolagem da página
+// Função para alternar o tema
+const toggleTheme = () => {
+  if (editedUser.value.tema === 1) {
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
+  } else {
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  }
+};
+
+watch(() => editedUser.value.tema, toggleTheme);
+
 const disableScroll = () => {
   document.body.style.overflow = 'hidden';
 };
 
-// Função para reabilitar a rolagem da página
 const enableScroll = () => {
   document.body.style.overflow = '';
 };
 
-// Desabilita a rolagem ao montar o componente
-onMounted(async () => {
-  disableScroll(); // Desabilita a rolagem
-  await authStore.fetchUserInfo();
-  userInfo.value = authStore.user;
-  if (userInfo.value) {
-    editedUser.value = { ...userInfo.value };
-  }
-});
-
-// Reabilita a rolagem ao desmontar o componente
-onUnmounted(() => {
-  enableScroll(); // Reabilita a rolagem
-});
-
+// Função para salvar as alterações
 const saveChanges = async () => {
   await authStore.updateUserInfo(editedUser.value);
   await authStore.fetchUserInfo();
@@ -130,6 +138,26 @@ const saveChanges = async () => {
     showMessage.value = false;
   }, 3000);
 };
+
+onMounted(async () => {
+  disableScroll(); 
+  await authStore.fetchUserInfo();
+  userInfo.value = authStore.user;
+  if (userInfo.value) {
+    editedUser.value = { ...userInfo.value };
+  }
+
+  // Aplicar tema salvo
+  if (localStorage.getItem('theme') === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+});
+
+onUnmounted(() => {
+  enableScroll(); 
+});
 </script>
 
 <style>
