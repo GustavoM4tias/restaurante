@@ -1,82 +1,82 @@
 import { defineStore } from "pinia";
-import axios from "axios";
+import api from "../services/api"; // Importa Axios com interceptores
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     token: localStorage.getItem("token") || "",
-    tipo: localStorage.getItem("tipo") || ""
+    tipo: localStorage.getItem("tipo") || "",
+    user: null
   }),
   getters: {
     isAuthenticated: (state) => !!state.token,
     tipo_usuario: (state) => state.tipo
   },
   actions: {
+    // Login do usuário
     async login(email, senha) {
       try {
-        const response = await axios.post("https://restaurante-api-gules.vercel.app/api/login", { email, senha });
-        // Atualiza token e tipo a partir da resposta
+        const response = await api.post("/login", { email, senha });
+
         this.token = response.data.token;
-        this.tipo = response.data.tipo;  
-        // this.tema = response.data.tema;
+        this.tipo = response.data.tipo;
+        this.user = response.data.usuario; // Guarda dados do usuário
+
         localStorage.setItem("token", this.token);
-        localStorage.setItem("tipo", this.tipo); 
+        localStorage.setItem("tipo", this.tipo);
       } catch (error) {
         console.error("Erro no login", error);
         throw error;
       }
     },
+
+    // Registro de usuário
     async register(nome, email, senha, tipo = null) {
       try {
         const data = tipo ? { nome, email, senha, tipo } : { nome, email, senha };
-        await axios.post("https://restaurante-api-gules.vercel.app/api/register", data, {
+        await api.post("/register", data, {
           headers: tipo ? { Authorization: this.token } : {}
         });
       } catch (error) {
-        // Verifica se o erro é de token expirado
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.msg === "Token expired"
-        ) {
-          this.logout();
-          window.location.href = "/login";
-        }
         console.error("Erro no registro", error);
         throw error;
       }
     },
+
+    // Atualizar informações do usuário
     async updateUserInfo(updatedData) {
       try {
-        const response = await axios.put("https://restaurante-api-gules.vercel.app/api/account", updatedData, {
-          headers: {
-            Authorization: this.token
-          }
+        const response = await api.put("/account", updatedData, {
+          headers: { Authorization: this.token }
         });
-        this.user = response.data;  
+        this.user = response.data;
       } catch (error) {
         console.error("Erro ao atualizar conta:", error);
       }
     },
+
+    // Buscar dados do usuário logado
     async fetchUserInfo() {
       try {
-        const response = await axios.get("https://restaurante-api-gules.vercel.app/api/account", {
-          headers: {
-            Authorization: this.token
-          }
+        const response = await api.get("/account", {
+          headers: { Authorization: this.token }
         });
         this.user = response.data;
-        this.tema = response.data.tema; 
       } catch (error) {
         console.error("Erro ao buscar dados da conta:", error);
       }
     },
+
+    // Logout do usuário
     logout() {
       this.token = "";
       this.tipo = "";
+      this.user = null;
       localStorage.removeItem("token");
       localStorage.removeItem("tipo");
-      window.location.href = "/";
+
+      if (window.location.pathname !== "/conta") { // Evita redirecionar para login se já estiver lá
+        window.location.href = "/conta"; 
+      }
     },
   },
 });
-
