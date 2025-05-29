@@ -1,60 +1,46 @@
-<!-- src/components/auth/RegisterModal.vue -->
 <template>
-  <!-- Modal wrapper -->
-  <div class="fixed inset-0 flex items-center justify-center z-50">
-    <!-- Backdrop -->
-    <div class="fixed inset-0 bg-black opacity-50" @click="closeModal"></div>
-    <!-- Modal content -->
-    <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md relative z-10">
-      <button class="absolute top-2 right-2 text-gray-500 dark:text-gray-300 hover:text-gray-700" @click="closeModal">
-        &times;
-      </button>
-      <h2 class="text-3xl font-bold text-center mb-6 text-gray-800 dark:text-gray-200">Cadastro</h2>
-      <form @submit.prevent="handleRegister" class="space-y-4">
-        <UIInput id="nome" v-model="nome" type="text" placeholder="Seu nome" label="Nome" />
-        <UIInput id="email" v-model="email" type="email" placeholder="Seu email" label="Email" />
-        <UIInput id="senha" v-model="senha" type="password" placeholder="Sua senha" label="Senha" />
-        <UIButton type="submit" variant="success">
-          Cadastrar
-        </UIButton>
-      </form>
-      <p class="mt-4 text-center text-gray-800 dark:text-gray-200">
-        Já tem conta?
-        <button @click="switchToLogin" class="text-green-500 hover:underline">
-          Entrar
-        </button>
-      </p>
-    </div>
-  </div>
+    <BaseInput v-model="name" placeholder="Nome" />
+    <BaseInput v-model="email" placeholder="Email" />
+    <BaseInput v-model="password" type="password" placeholder="Password" />
+
+    <BaseButton @click="onRegister" :disabled="loading">
+        <span v-if="loading">Registrando…</span>
+        <span v-else>Register</span>
+    </BaseButton>
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useAuthStore } from "../../stores/auth";
-import UIInput from "../UI/Input.vue";
-import UIButton from "../UI/Button.vue";
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useModalStore } from '@/stores/config/authModal'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import { useAuthStore } from '@/stores/auth'
 
-const nome = ref("");
-const email = ref("");
-const senha = ref("");
-const authStore = useAuthStore();
-const emit = defineEmits(["close", "switch-to-login"]);
+const name = ref('')
+const email = ref('')
+const password = ref('')
+const loading = ref(false)     // flag local de loading
+const auth = useAuthStore()
+const router = useRouter()
+const modalStore = useModalStore()
 
-const handleRegister = async () => {
-  try {
-    await authStore.register(nome.value, email.value, senha.value);
-    alert("Cadastro realizado com sucesso!");
-    emit("switch-to-login");
-  } catch (error) {
-    alert("Erro ao cadastrar. Tente novamente.");
-  }
-};
-
-const closeModal = () => {
-  emit("close");
-};
-
-const switchToLogin = () => {
-  emit("switch-to-login");
-};
+async function onRegister() {
+    if (loading.value) return
+    loading.value = true
+    try {
+        await auth.register({
+            name: name.value,
+            email: email.value,
+            password: password.value
+        })
+        router.push('/')
+        modalStore.closeModal()
+    } catch (err) {
+        console.error('Erro ao registrar:', err.response?.status, err.response?.data)
+        alert(`Falha no registro: ${err.response?.data?.error || err.message}`)
+    } finally {
+        loading.value = false
+    }
+}
 </script>

@@ -1,47 +1,38 @@
-// src/stores/auth.js
-import { defineStore } from "pinia";
-import axios from "axios";
+import { defineStore } from 'pinia'
+import api from '../services/api'
+import { useUserStore } from './user'
 
-export const useAuthStore = defineStore("auth", {
-  state: () => ({
-    token: localStorage.getItem("token") || "",
-    role: localStorage.getItem("role") || ""
-  }),
-  getters: {
-    isAuthenticated: (state) => !!state.token,
-    userRole: (state) => state.role,
-  },
-  actions: {
-    async login(email, senha) {
-      try {
-        const response = await axios.post("http://localhost:5000/api/login", { email, senha });
-        // Atualiza token e role a partir da resposta
-        this.token = response.data.token;
-        this.role = response.data.role; 
-        localStorage.setItem("token", this.token);
-        localStorage.setItem("role", this.role);
-      } catch (error) {
-        console.error("Erro no login", error);
-        throw error;
-      }
-    },
-    async register(nome, email, senha, role = null) {
-      try {
-        // Se role for passado, envie-o; caso contrário, o backend definirá "user"
-        const data = role ? { nome, email, senha, role } : { nome, email, senha };
-        await axios.post("http://localhost:5000/api/register", data, {
-          headers: role ? { Authorization: this.token } : {}
-        });
-      } catch (error) {
-        console.error("Erro no registro", error);
-        throw error;
-      }
-    },
-    logout() {
-      this.token = "";
-      this.role = "";
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-    },
-  },
-});
+export const useAuthStore = defineStore('auth', {
+    state: () => ({
+        token: localStorage.getItem('token') || ''
+    }),
+    actions: {
+        async login(payload) {
+            const { data } = await api.post('/auth/login', payload)
+            this.token = data.token
+            localStorage.setItem('token', data.token)
+        },
+        async register(payload) {
+            const { data } = await api.post('/auth/register', payload)
+            this.token = data.token
+            localStorage.setItem('token', data.token)
+        },
+        async loginWithGoogle(id_token) {
+            try {
+                const { data } = await api.post('/auth/login/google', { id_token })
+                this.token = data.token
+                localStorage.setItem('token', data.token)
+                return { data }
+            } catch (err) {
+                console.error('Erro no store loginWithGoogle:', err)
+                return { data: { token: '', user: null } }
+            }
+        },
+        logout() {
+            this.token = ''
+            localStorage.removeItem('token')
+            const userStore = useUserStore()
+            userStore.$reset()
+        }
+    }
+})

@@ -1,9 +1,9 @@
-@tailwind base;
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Optional: Add default theme styles */
-body {
-  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
-  transition: background-color 0.3s, color 0.3s;
+
+html { 
+    font-family: "Inter", sans-serif!important;
 }
+ 
