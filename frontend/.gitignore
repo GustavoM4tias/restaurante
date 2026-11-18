@@ -28,3 +28,8 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+# segredos
+.env
+.env.*
+!.env.example
